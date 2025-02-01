@@ -1,1 +1,2 @@
-powershell -ExecutionPolicy Bypass -File
+powershell -ExecutionPolicy Bypass -File gui.ps1
+gui.exe /C:"powershell -ExecutionPolicy Bypass -File gui.ps1 test"

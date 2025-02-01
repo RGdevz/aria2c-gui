@@ -1,15 +1,19 @@
 Add-Type -AssemblyName System.Windows.Forms
 
+# Get the first argument as URL (if provided)
+$downloadUrl = $args[0]
+
 # Create the form
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Aria2c Downloader"
 $form.Size = New-Object System.Drawing.Size(400, 180)
 $form.StartPosition = "CenterScreen"
 
-# Create a text box for the URL
+# Create a text box for the URL (pre-filled if argument exists)
 $textBox = New-Object System.Windows.Forms.TextBox
 $textBox.Location = New-Object System.Drawing.Point(10, 20)
 $textBox.Size = New-Object System.Drawing.Size(360, 20)
+$textBox.Text = $downloadUrl
 $form.Controls.Add($textBox)
 
 # Create a button for downloading

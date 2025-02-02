@@ -36,9 +36,23 @@ $button.Add_Click({
         $saveDir = $folderDialog.SelectedPath
 
         # Run aria2c with the selected directory
-        Start-Process -FilePath "aria2c.exe" -ArgumentList "-x10 `"$url`" -d `"$saveDir`"" -NoNewWindow -Wait
+        Start-Process -FilePath "aria2c.exe" -ArgumentList `
+        "-x10", `
+        "--check-certificate=false", `
+        "--conditional-get=true", `
+        "--allow-overwrite=true", `
+        "--always-resume=true", `
+        "--http-no-cache=true", `
+        "--max-file-not-found=0", `
+        "--max-tries=20", `
+        "--retry-wait=5", `
+        "`"$url`"", `
+        "-d", "`"$saveDir`"" `
+        -NoNewWindow -Wait
     }
+
 })
+
 $form.Controls.Add($button)
 
 # Show the form

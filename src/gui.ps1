@@ -31,6 +31,7 @@ $button.Add_Click({
     # Open folder selection dialog
     $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
     $folderDialog.Description = "Choose Save Directory"
+    $folderDialog.SelectedPath = (Get-Location).Path
     
     if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $saveDir = $folderDialog.SelectedPath

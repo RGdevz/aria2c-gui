@@ -1,0 +1,1 @@
+wrappe.exe src src/start.bat out.exe -t temp -u -w command -c 22 -n always

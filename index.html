@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aria2c-gui</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+   <link href="./css.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h4>Aria downloader</h4>
+            <input id="url" type="text" placeholder="url">
+            <div style="margin-top: 2rem;"></div>
+            <textarea readonly id="pscript">...</textarea>
+            <div style="margin-top: 2rem;"></div>
+            <button id="copy">copy</button>
+        </div>
+    </div>
+
+    <script>
+
+
+
+
+async function clippie(content, { reject = false } = {}) {
+  var _a;
+  try {
+    if (Array.isArray(content)) {
+      if (!((_a = navigator == null ? void 0 : navigator.clipboard) == null ? void 0 : _a.write)) {
+        for (const c of content) {
+          if (typeof c === "string") fallback(c);
+        }
+      }
+      await navigator.clipboard.write([
+        new ClipboardItem(Object.fromEntries(content.map((c) => {
+          return [(c == null ? void 0 : c.type) ?? "text/plain", c];
+        })))
+      ]);
+      return true;
+    } else if (content instanceof Blob) {
+      await navigator.clipboard.write([new ClipboardItem({ [content.type]: content })]);
+      return true;
+    } else {
+      try {
+        await navigator.clipboard.writeText(String(content));
+        return true;
+      } catch {
+        return fallback(content);
+      }
+    }
+  } catch (err) {
+    if (reject) throw err;
+    return false;
+  }
+}
+function fallback(content) {
+  if (!document.execCommand) return false;
+  const el = document.createElement("textarea");
+  el.value = String(content);
+  el.style.clipPath = "inset(50%)";
+  el.ariaHidden = "true";
+  document.body.append(el);
+  try {
+    el.select();
+    return document.execCommand("copy");
+  } finally {
+    el.remove();
+  }
+}
+
+
+
+
+function cmd(url){
+
+ return toBase64UTF16LE(`& { $script = (Invoke-RestMethod 'https://raw.githubusercontent.com/RGdevz/aria2c-gui/refs/heads/main/download.ps1'); Invoke-Command -ScriptBlock ([scriptblock]::Create($script)) -ArgumentList '${url}' }`)
+
+}
+
+function toBase64UTF16LE(str) {
+    let utf16leBytes = new Uint8Array(str.length * 2);
+    for (let i = 0; i < str.length; i++) {
+        utf16leBytes[i * 2] = str.charCodeAt(i) & 0xFF; // Low byte
+        utf16leBytes[i * 2 + 1] = str.charCodeAt(i) >> 8; // High byte
+    }
+    return btoa(String.fromCharCode(...utf16leBytes));
+}
+
+
+
+  document.addEventListener('DOMContentLoaded',()=>{
+
+
+
+    const pscript = document.getElementById('pscript')
+
+
+    document.getElementById('copy').addEventListener('click',()=>{
+
+
+        clippie(pscript.textContent)
+    })
+
+
+    document.getElementById('url').addEventListener('input',e=>{
+
+    const text = e.target.value
+
+    pscript.textContent = `powershell -NoExit -ExecutionPolicy Bypass -NoProfile -EncodedCommand ${cmd(text)}`
+
+    })
+
+
+
+  }
+)
+
+
+    </script>
+
+</body>
+</html>

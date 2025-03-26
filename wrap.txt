@@ -1,0 +1,2 @@
+wrappe.exe src src/start.bat gui.exe -t temp -u -w command -c 22 -n always
+upx --best --ultra-brute gui.exe

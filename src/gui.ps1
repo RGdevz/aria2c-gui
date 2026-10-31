@@ -50,7 +50,6 @@ $button.Add_Click({
         "--http-no-cache=true", `
         "--max-file-not-found=0", `
         "--max-tries=20", `
-        "--file-allocation=none", `
         "--retry-wait=5", `
         "`"$url`"", `
         "-d", "`"$saveDir`"" `

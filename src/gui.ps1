@@ -41,6 +41,7 @@ $button.Add_Click({
         "-x 8", `
         "-s 8", `
         "-k 4M", `
+        "--file-allocation=falloc", `
         "--lowest-speed-limit=10K", `
         "--async-dns=false", `
         "--check-certificate=false", `

@@ -22,7 +22,7 @@ $button.Text = "Download"
 $button.Location = New-Object System.Drawing.Point(140, 60)
 $button.Add_Click({
     $url = $textBox.Text.Trim()
-    
+
     if ($url -eq "") {
         [System.Windows.Forms.MessageBox]::Show("Please enter a URL.")
         return
@@ -32,31 +32,44 @@ $button.Add_Click({
     $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
     $folderDialog.Description = "Choose Save Directory"
     # $folderDialog.SelectedPath = (Get-Location).Path
-    
+
     if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $saveDir = $folderDialog.SelectedPath
 
-        # Run aria2c with the selected directory
-        Start-Process -FilePath "aria2c.exe" -ArgumentList `
-        "-x 8", `
-        "-s 8", `
-        "-k 4M", `
-        "--file-allocation=falloc", `
-        "--lowest-speed-limit=10K", `
-        "--async-dns=false", `
-        "--check-certificate=false", `
-        "--conditional-get=true", `
-        "--allow-overwrite=true", `
-        "--always-resume=true", `
-        "--http-no-cache=true", `
-        "--max-file-not-found=0", `
-        "--max-tries=20", `
-        "--retry-wait=5", `
-        "`"$url`"", `
-        "-d", "`"$saveDir`"" `
-        -NoNewWindow -Wait
-    }
+        # Resolve full path now, because the elevated process starts in System32
+        $cmd = Get-Command aria2c.exe -ErrorAction SilentlyContinue
+        $aria = if ($cmd) { $cmd.Source } else { "aria2c.exe" }
 
+        # Common options (allocation mode is added below)
+        $baseArgs = @(
+            "-x 8",
+            "-s 8",
+            "-k 4M",
+            "--lowest-speed-limit=10K",
+            "--async-dns=false",
+            "--check-certificate=false",
+            "--conditional-get=true",
+            "--allow-overwrite=true",
+            "--always-resume=true",
+            "--http-no-cache=true",
+            "--max-file-not-found=0",
+            "--max-tries=20",
+            "--retry-wait=5",
+            "`"$url`"",
+            "-d", "`"$saveDir`""
+        )
+
+        try {
+            # Elevated: falloc (UAC prompt appears, aria2c gets its own window)
+            Start-Process -FilePath $aria -Verb RunAs -Wait -ErrorAction Stop `
+                -ArgumentList (@("--file-allocation=falloc") + $baseArgs)
+        }
+        catch {
+            # UAC declined or failed: no admin, use prealloc
+            Start-Process -FilePath $aria -NoNewWindow -Wait `
+                -ArgumentList (@("--file-allocation=prealloc") + $baseArgs)
+        }
+    }
 })
 
 $form.Controls.Add($button)
